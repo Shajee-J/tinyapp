@@ -11,7 +11,13 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-function generateRandomString() {}
+function generateRandomString() { const chars = "abcefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWVXYZ0123456789"
+let result = "";
+for (let i = 0; i <= 6; i++ ){
+  result += chars.charAt(Math.floor(Math.random() * chars.length));
+}
+return result; 
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -35,8 +41,14 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); 
-  res.send("Ok"); 
+  const id = generateRandomString()
+  urlDatabase[id] = req.body.longURL; 
+  res.redirect(`/urls/${id}`);
+});
+
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id]
+  res.redirect(longURL);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -44,6 +56,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
