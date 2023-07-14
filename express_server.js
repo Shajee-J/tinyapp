@@ -15,6 +15,11 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  "email": "password",
+  "sage": "1234"
+};
+
 function generateRandomString() { const chars = "abcefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWVXYZ0123456789"
 let result = "";
 for (let i = 0; i <= 6; i++ ){
@@ -88,6 +93,16 @@ const username ={ username: req.cookies["username"] }
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"] };
   res.render("urls_show", templateVars);
+});
+
+app.get("/register", (req, res) => {
+  const templateVars = { username: req.cookies["username"], email: req.body.email, password: req.body.password };
+  res.render("urls_register", templateVars);
+});
+
+app.post("/register", (req, res) => {
+  const templateVars = { username: req.cookies["username"], email: req.body.email, password: req.body.password };
+  res.render("urls_register", templateVars);
 });
 
 
