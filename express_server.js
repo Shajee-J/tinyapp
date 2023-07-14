@@ -70,4 +70,9 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/login", (req, res) => {
+  const name = req.body.username
+     res.cookie("username", name);
+     res.redirect(`/urls`);
+});
 
