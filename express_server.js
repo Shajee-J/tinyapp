@@ -45,6 +45,12 @@ app.post("/login", (req, res) => {
      res.redirect(`/urls`);
 });
 
+app.post("/logout", (req, res) => {
+  const name = req.body.username
+  res.clearCookie("username", name);
+     res.redirect(`/urls`);
+});
+
 app.get("/urls", (req, res) => {
   const templateVars = {
     username: req.cookies["username"], 
