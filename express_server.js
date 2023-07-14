@@ -45,10 +45,15 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(`/urls`)
 });
 
+app.post("/urls/:id/Edit", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL
+  res.redirect(`/urls`)
+});
+
 app.post("/urls", (req, res) => {
   const id = generateRandomString()
   urlDatabase[id] = req.body.longURL; 
-  res.redirect(`/urls/${id}`);
+  res.redirect(`/urls`);
 });
 
 app.get("/u/:id", (req, res) => {
