@@ -29,13 +29,34 @@ const users = {
   },
 };
 
-function generateRandomString() { const chars = "abcefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWVXYZ0123456789"
+const generateRandomString = function() { const chars = "abcefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUWVXYZ0123456789"
 let result = "";
 for (let i = 0; i <= 6; i++ ){
   result += chars.charAt(Math.floor(Math.random() * chars.length));
 }
 return result; 
 };
+
+const userByEmail = function(email) {
+  for (let key in users){
+    if (users[key].email === email){
+      console.log(users[key])
+      return users[key];
+    }
+  }
+  return null;
+};
+
+const userByPass = function(password) {
+  for (let key in users){
+    if (users[key].password === password){
+      console.log(users[key])
+      return users[key];
+    }
+  }
+  return null;
+};
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -54,14 +75,43 @@ app.get("/hello", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  const name = req.body.username
-     res.cookie("username", name);
-     res.redirect(`/urls`);
+  const ID = generateRandomString();
+  const userID = ID
+  const email = req.body.email 
+  const password = req.body.password
+  
+  if (userByEmail(email) !== null && email.length !== 0 && password.length !== 0) {
+    if (userByPass(password) !== null){
+  users[ID] = {
+    id : userID,
+    email: email,
+    password: password
+    }
+  res.cookie("userID", userID)
+  res.redirect(`/urls`);
+  console.log(users)
+  } else {
+    res.send("error code: 403, invalid Login, please check credentials and try again") 
+  }
+  } else {
+  res.send("error code: 403, invalid Login, please check credentials and try again") 
+  }
+  });
+
+app.get("/login", (req, res) => {
+  const templateVars = { 
+    urls: urlDatabase, 
+    email: undefined};
+    const userID = req.cookies.userID;
+    if (users[userID]) {
+      templateVars.email = users[userID].email
+    };
+    res.render("urls_login", templateVars);
 });
 
 app.post("/logout", (req, res) => {
   res.clearCookie("userID");
-     res.redirect(`/urls`);
+     res.redirect(`/login`);
 });
 
 app.get("/urls", (req, res) => {
@@ -97,10 +147,13 @@ app.get("/u/:id", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = { email: undefined };
-  const userID = req.cookies.userID;
-  if (users[userID]) {
-    templateVars.email = users[userID].email};
+  const templateVars = { 
+    urls: urlDatabase, 
+    email: undefined};
+    const userID = req.cookies.userID;
+    if (users[userID]) {
+      templateVars.email = users[userID].email;
+    }
   res.render("urls_new", templateVars);
 });
 
@@ -113,7 +166,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = { username: req.cookies["username"], email: req.body.email, password: req.body.password };
+  const templateVars = { email: req.body.email, password: req.body.password };
   res.render("urls_register", templateVars);
 });
 
@@ -122,14 +175,20 @@ app.post("/register", (req, res) => {
 const userID = ID
 const email = req.body.email 
 const password = req.body.password
+
+if (userByEmail(email) === null && email.length !== 0 && password.length !== 0) {
 users[ID] = {
   id : userID,
   email: email,
   password: password
-}
-res.cookie("userID", userID)
+  }
+  res.cookie("userID", userID)
 res.redirect(`/urls`);
 console.log(users)
+
+} else {
+res.send("Error! status code: 400") 
+}
 });
 
 

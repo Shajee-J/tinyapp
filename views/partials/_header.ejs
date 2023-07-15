@@ -23,7 +23,6 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <a class="nav-item nav-link" href="/register">Sign-up</a>
       </div>
         </div>
         <% if (email) { %>
@@ -32,9 +31,11 @@
           <button class="btn btn-outline-dark me-2" > logout </button>
         </form>
         <% } else { %> 
-        <form class="d-flex" method="post" action="/login">
-          <input type="username" class="form-control" id="email" aria-label="username" placeholder="Username" name="email">
-          <button class="btn btn-outline-dark" type="submit"> Login </button>
+        <form class="d-flex" method="get" action="/login">
+          <button class="btn btn-outline-dark r-5 mr-2" type="submit"> Login </button>
+        </form>
+        <form class="d-flex" method="get" action="/register">
+          <button class="btn btn-outline-dark r-5 ml-2" type="submit"> Sign-up</button>
         </form>
       <%}%>
   </nav>
