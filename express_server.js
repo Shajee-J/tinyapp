@@ -21,6 +21,10 @@ const urlDatabase = {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
   },
+  x2BN0h: {
+    longURL: "https://www.lighthouselabs.ca",
+    userID: "fd3g4W",
+  },
 };
 
 const users = {
@@ -74,6 +78,17 @@ const entryByID = function(ID) {
   return false;
 };
 
+urlsForUser = function(id) {
+  const urls = {};
+  for (let key in urlDatabase){
+    if (urlDatabase[key].userID === id){
+      urls[key] = urlDatabase[key].longURL;
+    }   
+  }
+  console.log(urls)
+  return urls;
+};
+
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -108,10 +123,9 @@ app.post("/login", (req, res) => {
   res.redirect(`/urls`);
   console.log(users)
   } else {
-    res.send("error code: 403, invalid Login, please check credentials and try again") 
   }
   } else {
-  res.send("error code: 403, invalid Login, please check credentials and try again") 
+  res.send("error code: 403, invalid Login, please check credentials and try again\n") 
   }
   });
 
@@ -136,24 +150,52 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const userID = req.cookies.userID;
   const templateVars = { 
-    urls: urlDatabase, 
-    email: undefined};
-    const userID = req.cookies.userID;
+    id: req.params.id,
+    urls: urlsForUser(userID), 
+    email: undefined };
     if (users[userID]) {
       templateVars.email = users[userID].email
     }
   res.render("urls_index", templateVars);
+  console.log(urls)
 });
 
 app.post("/urls/:id/delete", (req, res) => {
+  if(entryByID(req.params.id)){
+  if (req.cookies.userID){
+    if (req.cookies.userID === urlDatabase[req.params.id].userID){
   delete urlDatabase[req.params.id]
   res.redirect(`/urls`)
+} else {
+  res.send("you don't own this short URL\n")
+}
+}
+else {
+   res.send("you need to be logged in to access this\n")
+}}
+else {
+  res.send("this short URL doesn't exsit, please check that the short URL was entered correctly and try again.\n")
+}
 });
 
 app.post("/urls/:id/Edit", (req, res) => {
+  if(entryByID(req.params.id)){
+  if (req.cookies.userID){
+    if (req.cookies.userID === urlDatabase[req.params.id].userID){
   urlDatabase[req.params.id].longURL = req.body.longURL
   res.redirect(`/urls`)
+} else {
+  res.send("you don't own this short URL\n")
+}
+}
+else {
+ res.send("you need to be logged in to access this\n")
+}}
+else {
+  res.send("this short URL doesn't exsit, please check that the short URL was entered correctly and try again.\n")
+}
 });
 
 app.post("/urls", (req, res) => {
@@ -175,7 +217,7 @@ app.get("/u/:id", (req, res) => {
   res.redirect(longURL);
 }
 else {
-  res.send("ID does not exist")
+  res.send("ID does not exist\n")
 }
 });
 
@@ -195,11 +237,19 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, email: undefined  };
-  const userID = req.cookies.userID;
+  if (req.cookies.userID){
+    const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, email: undefined};
+    const userID = req.cookies.userID;
+    if (req.cookies.userID === urlDatabase[req.params.id].userID){
   if (users[userID]) {
     templateVars.email = users[userID].email};
   res.render("urls_show", templateVars);
+  } else {
+  res.send("you don't own this short URL!!!\n")
+}} else {
+  res.send("please login to gain access\n")
+}
+
 });
 
 app.get("/register", (req, res) => {
@@ -228,7 +278,7 @@ res.redirect(`/urls`);
 console.log(users)
 
 } else {
-res.send("Error! status code: 400") 
+res.send("Error! status code: 400\n") 
 }
 });
 
