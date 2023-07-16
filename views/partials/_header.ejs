@@ -26,9 +26,9 @@
       </div>
         </div>
         <% if (email) { %>
-          <h4 class="nav-item"> Logged in as: <%= email %></h4>
+          <h5 class="nav-item"> Logged in as: <%= email %></h5>
           <form class="d-flex" method="post" action="/logout">
-          <button class="btn btn-outline-dark me-2" > logout </button>
+          <button class="btn btn-outline-dark r-5 ml-2" > logout </button>
         </form>
         <% } else { %> 
         <form class="d-flex" method="get" action="/login">
