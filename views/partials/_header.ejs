@@ -5,7 +5,7 @@
   href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
   integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
   crossorigin="anonymous"
-/>
+  />
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
     <button
@@ -28,14 +28,14 @@
         <% if (email) { %>
           <h5 class="nav-item"> Logged in as: <%= email %></h5>
           <form class="d-flex" method="post" action="/logout">
-          <button class="btn btn-outline-dark r-5 ml-2" > logout </button>
+          <button class="btn btn-dark r-5 ml-2" > Logout </button>
         </form>
         <% } else { %> 
         <form class="d-flex" method="get" action="/login">
-          <button class="btn btn-outline-dark r-5 mr-2" type="submit"> Login </button>
+          <button class="btn btn-dark r-5 mr-2" type="submit"> Login </button>
         </form>
         <form class="d-flex" method="get" action="/register">
-          <button class="btn btn-outline-dark r-5 ml-2" type="submit"> Sign-up</button>
+          <button class="btn btn-dark r-5 ml-2" type="submit"> Sign-up</button>
         </form>
       <%}%>
   </nav>
