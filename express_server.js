@@ -1,5 +1,5 @@
 const cookieParser = require("cookie-parser");
-
+const bcrypt = require("bcryptjs");
 
 const express = require("express");
 const app = express();
@@ -51,18 +51,16 @@ return result;
 const userByEmail = function(email) {
   for (let key in users){
     if (users[key].email === email){
-      console.log(users[key])
       return users[key];
     }
   }
   return null;
 };
 
-const userByPass = function(password) {
+const userByPass = function(pass) {
   for (let key in users){
-    if (users[key].password === password){
-      console.log(users[key])
-      return users[key];
+    if (bcrypt.compareSync(pass, users[key].password)){
+      return true;
     }
   }
   return null;
@@ -71,7 +69,6 @@ const userByPass = function(password) {
 const entryByID = function(ID) {
   for (let key in urlDatabase){
     if (key === ID){
-      console.log(key)
       return true;
     }
   }
@@ -85,7 +82,6 @@ urlsForUser = function(id) {
       urls[key] = urlDatabase[key].longURL;
     }   
   }
-  console.log(urls)
   return urls;
 };
 
@@ -113,7 +109,7 @@ app.post("/login", (req, res) => {
   const password = req.body.password
   
   if (userByEmail(email) !== null && email.length !== 0 && password.length !== 0) {
-    if (userByPass(password) !== null){
+    if(userByPass(password)){
   users[ID] = {
     id : userID,
     email: email,
@@ -121,10 +117,9 @@ app.post("/login", (req, res) => {
     }
   res.cookie("userID", userID)
   res.redirect(`/urls`);
-  console.log(users)
   } else {
-  }
-  } else {
+    res.send("error code: 403, invalid Login, please check credentials and try again\n")
+  }} else {
   res.send("error code: 403, invalid Login, please check credentials and try again\n") 
   }
   });
@@ -159,7 +154,6 @@ app.get("/urls", (req, res) => {
       templateVars.email = users[userID].email
     }
   res.render("urls_index", templateVars);
-  console.log(urls)
 });
 
 app.post("/urls/:id/delete", (req, res) => {
@@ -254,7 +248,10 @@ app.get("/urls/:id", (req, res) => {
 
 app.get("/register", (req, res) => {
   if(!req.cookies.userID){
-  const templateVars = { email: req.body.email, password: req.body.password }
+  const templateVars = { 
+    email: req.body.email, 
+    password: req.body.password 
+  }
   res.render("urls_register", templateVars)
   } else {
     res.redirect(`/urls`);
@@ -263,20 +260,19 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   const ID = generateRandomString();
-const userID = ID
-const email = req.body.email 
-const password = req.body.password
+const userID = ID;
+const email = req.body.email;
+const password = req.body.password;
+const hashedPassword = bcrypt.hashSync(password, 10);
 
 if (userByEmail(email) === null && email.length !== 0 && password.length !== 0) {
 users[ID] = {
   id : userID,
   email: email,
-  password: password
+  password: hashedPassword
   }
-  res.cookie("userID", userID)
+  res.cookie("userID", userID, {maxAge: 600000, httpOnly: true});
 res.redirect(`/urls`);
-console.log(users)
-
 } else {
 res.send("Error! status code: 400\n") 
 }
