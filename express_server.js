@@ -1,6 +1,6 @@
 
 // dependencies
-const { urlsForUser, entryByID, userByPass, getUserByEmail, generateRandomString, users, urlDatabase  } = require("./helpers");
+const { urlsForUser, verifyOwnership, verifyPassword, getUserByEmail, generateRandomString, users, urlDatabase, verifyUserIdByEmail  } = require("./helpers");
 const bcrypt = require("bcryptjs");
 const cookieSession = require('cookie-session');
 
@@ -27,54 +27,12 @@ app.listen(PORT, () => {
 });
 
 
+// home page redirect:
 
-// /login paths:
-
-app.get("/login", (req, res) => {
-  if (!req.session.user_id) {
-    const templateVars = {
-      urls: urlDatabase,
-      email: undefined};
-    const userID = req.session.user_id;
-    if (users[userID]) {
-      templateVars.email = users[userID].email;
-    }
-    res.render("urls_login", templateVars);
-  } else {
-    res.redirect("/urls");
-  }
+app.get("/", (req, res) => {
+  res.redirect("/login");
 });
 
-app.post("/login", (req, res) => {
-  const ID = generateRandomString();
-  const userID = ID;
-  const email = req.body.email;
-  const password = req.body.password;
-  
-  if (getUserByEmail(email, users) !== undefined && email.length !== 0 && password.length !== 0) {
-    if (userByPass(password)) {
-      users[ID] = {
-        id : userID,
-        email: email,
-        password: password
-      };
-      req.session.user_id = userID;
-      res.redirect(`/urls`);
-    } else {
-      res.send("error code: 403, invalid login.\n Please check credentials and try again\n");        // <== example of error code and/or msg based on conditionals
-    }
-  } else {
-    res.send("error code: 403, invalid login.\n Please check credentials and try again.\n If you haven't already registered then please do so prior to next attempt. \n");
-  }
-});
-
-
-// /logout path:
-
-app.post("/logout", (req, res) => {
-  req.session = null;
-  res.redirect(`/login`);
-});
 
 
 
@@ -102,7 +60,7 @@ app.get("/urls", (req, res) => {
 
     const userID = req.session.user_id;
     const templateVars = {
-      id: req.params.id,
+      id: urlsForUser(req.session.user_id),
       urls: urlsForUser(userID),
       email: undefined };
     if (users[userID]) {
@@ -118,7 +76,7 @@ app.get("/urls", (req, res) => {
 // delete requests
 
 app.post("/urls/:id/delete", (req, res) => {
-  if (entryByID(req.params.id)) {
+  if (verifyOwnership(req.params.id)) {
     if (req.session.user_id) {
       if (req.session.user_id === urlDatabase[req.params.id].userID) {
         delete urlDatabase[req.params.id];
@@ -137,7 +95,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // edit/update requests
 
 app.post("/urls/:id/Edit", (req, res) => {
-  if (entryByID(req.params.id)) {
+  if (verifyOwnership(req.params.id)) {
     if (req.session.user_id) {
       if (req.session.user_id === urlDatabase[req.params.id].userID) {
         urlDatabase[req.params.id].longURL = req.body.longURL;
@@ -187,17 +145,17 @@ app.get("/urls/:id", (req, res) => {
   } else {
     res.send("please login to gain access\n");
   }
+});
 
-  // search/brower directing requests
+// search/brower directing requests
 
-  app.get("/u/:id", (req, res) => {
-    const longURL = urlDatabase[req.params.id].longURL;
-    if (entryByID(req.params.id)) {
-      res.redirect(longURL);
-    } else {
-      res.send("ID does not exist\n");
-    }
-  });
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id].longURL;
+  if (verifyOwnership(req.params.id)) {
+    res.redirect(longURL);
+  } else {
+    res.send("ID does not exist\n");
+  }
 });
 
 // registeration paths:
@@ -232,6 +190,51 @@ app.post("/register", (req, res) => {
   } else {
     res.send("Error! status code: 400\n");
   }
+});
+
+
+// /login paths:
+
+app.get("/login", (req, res) => {
+  if (!req.session.user_id) {
+    const templateVars = {
+      urls: urlDatabase,
+      email: undefined};
+    const userID = req.session.user_id;
+    if (users[userID]) {
+      templateVars.email = users[userID].email;
+    }
+    res.render("urls_login", templateVars);
+  } else {
+    res.redirect("/urls");
+  }
+});
+
+
+app.post("/login", (req, res) => {
+  console.log(users);
+  const email = req.body.email;
+  const password = req.body.password;
+  const ID = verifyUserIdByEmail(email, users);
+  const userID = ID;
+  if (getUserByEmail(email, users) !== undefined && email.length !== 0 && password.length !== 0) {
+    if (verifyPassword(password, ID)) {
+      req.session.user_id = userID;
+      res.redirect(`/urls`);
+    } else {
+      res.send("error code: 403, invalid login.\n Please check credentials and try again\n");        // <== example of error code and/or msg based on conditionals
+    }
+  } else {
+    res.send("error code: 403, invalid login.\n Please check credentials and try again.\n If you haven't already registered then please do so prior to next attempt. \n");
+  }
+});
+
+
+// /logout path:
+
+app.post("/logout", (req, res) => {
+  req.session = null;
+  res.redirect(`/login`);
 });
 
 

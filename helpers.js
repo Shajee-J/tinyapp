@@ -61,22 +61,27 @@ const getUserByEmail = function(email, db) {
   return undefined;
 };
 
-
-//  password confirmation
-
-const userByPass = function(pass) {
-  for (let key in users) {
-    if (bcrypt.compareSync(pass, users[key].password)) {
-      return true;
+const verifyUserIdByEmail = function(email, db) {
+  for (let key in db) {
+    if (db[key].email === email) {
+      return key;
     }
+  }
+  return undefined;
+};
+
+
+
+const verifyPassword = function(pass, userID) {
+  if (bcrypt.compareSync(pass, users[userID].password)) {
+    return true;
   }
   return false;
 };
 
 
-// data entry confirmation
 
-const entryByID = function(ID) {
+const verifyOwnership = function(ID) {
   for (let key in urlDatabase) {
     if (key === ID) {
       return true;
@@ -88,7 +93,7 @@ const entryByID = function(ID) {
 
 // fetches URLs per user
  
-urlsForUser = function(id) {
+const urlsForUser = function(id) {
   const urls = {};
   for (let key in urlDatabase) {
     if (urlDatabase[key].userID === id) {
@@ -100,4 +105,4 @@ urlsForUser = function(id) {
 
 // export logic:
 
-module.exports = { urlsForUser, entryByID, userByPass, getUserByEmail, generateRandomString, users, urlDatabase  };
+module.exports = { urlsForUser, verifyOwnership, verifyPassword, getUserByEmail, generateRandomString, users, urlDatabase, verifyUserIdByEmail  };
