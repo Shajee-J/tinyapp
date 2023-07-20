@@ -11,7 +11,13 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 
 
+![/register page form can only be accessed while signed out](image.png)
+
+
+
+
 ![/register page form can only be accessed while signed out](image-2.png)
+
 
 
 

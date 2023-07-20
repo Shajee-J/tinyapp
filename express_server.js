@@ -14,8 +14,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieSession({
   name: 'session',
-  keys: ["secure"],
-  maxAge: 60 * 60 * 1000
+  keys: ["secure"]
 }));
 
 
@@ -131,6 +130,7 @@ app.get("/urls/new", (req, res) => {
 // pathing for details page expressed as urls_show
 
 app.get("/urls/:id", (req, res) => {
+  if (verifyOwnership(req.params.id)){
   if (req.session.user_id) {
     const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id].longURL, email: undefined};
     const userID = req.session.user_id;
@@ -142,19 +142,26 @@ app.get("/urls/:id", (req, res) => {
     } else {
       res.send("you don't own this short URL!!!\n");
     }
-  } else {
+    } else {
     res.send("please login to gain access\n");
+  }}
+  else {
+    res.send("this short URL doesn't exsit, please check that the short URL was entered correctly and try again.\n");
   }
 });
 
 // search/brower directing requests
 
 app.get("/u/:id", (req, res) => {
+  if (verifyOwnership(req.params.id)){
   const longURL = urlDatabase[req.params.id].longURL;
-  if (verifyOwnership(req.params.id)) {
+  if (req.session.user_id === urlDatabase[req.params.id].userID) {
     res.redirect(longURL);
   } else {
-    res.send("ID does not exist\n");
+    res.send("you don't own this short URL!!!\n");
+  }}
+  else {
+    res.send("this short URL doesn't exsit, please check that the short URL was entered correctly and try again.\n");
   }
 });
 
@@ -212,7 +219,6 @@ app.get("/login", (req, res) => {
 
 
 app.post("/login", (req, res) => {
-  console.log(users);
   const email = req.body.email;
   const password = req.body.password;
   const ID = verifyUserIdByEmail(email, users);
